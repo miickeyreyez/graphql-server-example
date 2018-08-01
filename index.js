@@ -1,15 +1,33 @@
-//const express = require('express');
-const { ApolloServer, gql, PubSub } = require('apollo-server');
+//const MongoClient = require('mongodb');
+const express = require('express');
+const http = require('http');
+const { PubSub } = require('apollo-server');
+const { ApolloServer, gql } = require('apollo-server-express');
+const MongoClient = require('mongodb').MongoClient
+
+var db
+
+/*
+const MONGO_URL = 'mongodb://localhost:27017'
+const db = await MongoClient.connect(MONGO_URL)
+const Books = db.collection('books')*/
+
+/*
+console.log("************************************")
+console.log("************************************")
+console.log(Books)*/
 
 // This is a (sample) collection of books we'll be able to query
 // the GraphQL server for.  A more complete example might fetch
 // from an existing data source like a REST API or database.
 let book = [
   {
+    _id: '5b60a0392fba65cdd96b1338',
     title: 'Harry Potter and the Chamber of Secrets',
     author: 'J.K. Rowling',
   },
   {
+    _id: '5b60a0392fba65cdd96b133b',
     title: 'Jurassic Park',
     author: 'Michael Crichton',
   },
@@ -25,6 +43,7 @@ const typeDefs = gql`
 
   # This "Book" type can be used in other type declarations.
   type Book {
+    _id: String
     title: String
     author: String
   }
@@ -33,6 +52,7 @@ const typeDefs = gql`
   # (A "Mutation" type will be covered later on.)
   type Query {
     books: [Book],
+    book(_id: String): Book,
     hello: String
   }
 
@@ -41,7 +61,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addBook(title: String, author: String): Book,
+    addBook(_id: String, title: String, author: String): Book,
   }
 `;
 
@@ -60,10 +80,10 @@ const resolvers = {
   Mutation: {
     addBook: (root, args) => {
       console.log(args)
-      book.push({ title: args.title, author: args.author })
+      book.push({ _id: args._id, title: args.title, author: args.author })
       console.log(JSON.stringify(book))
       pubsub.publish(SOMETHING_CHANGED_TOPIC, { bookAdded: args });
-      return { title: args.title, author: args.author }
+      return { _id: args._id, title: args.title, author: args.author }
     }
   },
 };
@@ -72,25 +92,35 @@ const resolvers = {
 // by passing type definitions (typeDefs) and the resolvers
 // responsible for fetching the data for those types.
 const server = new ApolloServer({ typeDefs, resolvers });
-/*
+
 const app = express();
 server.applyMiddleware({ app });
-app.listen({ port: 4000 }, () =>
+
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+MongoClient.connect("mongodb://localhost:27017/test", {useNewUrlParser: true }, (err, client) => {
+  if (err) return console.log(err)
+  db = client.db('test') // whatever your database name is
+
+  db.collection('books').find().toArray(function(err, results) {
+    console.log(results)
+    // send HTML file populated with quotes here
+  })
+
+  /*
+  app.listen(3000, () => {
+    console.log('listening on 3000')
+  })*/
+  httpServer.listen({ port: 4000 }, () =>
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
+  console.log(`🚀 Subscriptions ready at ws://localhost:4000${server.subscriptionsPath}`)
 );
-*/
+})
+
 
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
-server.listen().then(({ url }) => {
+/*server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
-});
-
-//publish events every second
-setInterval(
-  () =>
-    pubsub.publish(SOMETHING_CHANGED_TOPIC, {
-      newMessage: new Date().toString(),
-    }),
-  1000,
-);
+});*/
