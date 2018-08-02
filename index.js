@@ -1,11 +1,25 @@
 //const MongoClient = require('mongodb');
+const fetch = require('node-fetch');
 const express = require('express');
 const http = require('http');
 const { PubSub } = require('apollo-server');
 const { ApolloServer, gql } = require('apollo-server-express');
+var mongoose = require('mongodb')
 const MongoClient = require('mongodb').MongoClient
 
+mongoose.connect('mongodb://localhost:27017/test', (err, res) => {
+  if (err) {
+    throw err
+  } else {
+    console.log('La base de datos esta corriendo correctamente')
+  }
+})
 var db
+
+fetch('https://jsonplaceholder.typicode.com/todos/1')
+  .then(response => response.json())
+  .then(json => console.log(json))
+
 
 /*
 const MONGO_URL = 'mongodb://localhost:27017'
