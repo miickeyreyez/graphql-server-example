@@ -4,7 +4,7 @@ const express = require('express');
 const http = require('http');
 const { PubSub } = require('apollo-server');
 const { ApolloServer, gql } = require('apollo-server-express');
-var mongoose = require('mongodb')
+var mongoose = require('mongoose')
 const MongoClient = require('mongodb').MongoClient
 
 mongoose.connect('mongodb://localhost:27017/test', (err, res) => {
@@ -16,7 +16,8 @@ mongoose.connect('mongodb://localhost:27017/test', (err, res) => {
 })
 var db
 
-fetch('https://jsonplaceholder.typicode.com/todos/1')
+//fetch('https://jsonplaceholder.typicode.com/todos/1')
+fetch('http://192.168.2.79:8000')
   .then(response => response.json())
   .then(json => console.log(json))
 
