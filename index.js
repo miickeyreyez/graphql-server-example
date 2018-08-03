@@ -6,7 +6,103 @@ var mongoose = require('mongoose');
 var book = require('./books');
 var bc = require('./bookController');
 var app = require('./app');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+//const sequelize = new Sequelize('postgres://miguel.martinez:P0zTgr3z!@127.0.0.1:5432/test');
+const sequelize = new Sequelize('test', 'miguel.martinez', 'P0zTgr3z!', {
+  host: '127.0.0.1',
+  dialect: 'postgres',
+  operatorsAliases: false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+});
 var exampleRestResponse = ''
+
+sequelize.authenticate().then(() => {
+  console.log('Connection has been established successfully.');
+  //User.sync({force: true})
+  User.create({
+    firstName: 'John',
+    lastName: 'Hancock'
+  }).catch( err => {
+    if(err) {
+      console.log("LLAVE REPETIDA")
+    }
+  });
+
+  User.create({
+    firstName: 'HGHGHGH',
+    lastName: 'BBBBBB'
+  }).catch( err => {
+    if(err) {
+      console.log("LLAVE REPETIDA")
+    }
+  });
+
+}).catch(err => {
+  console.error('Unable to connect to the database:', err);
+})
+
+const User = sequelize.define('user', {
+  firstName: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+
+  },
+  lastName: {
+    type: Sequelize.STRING
+  }
+});
+console.log("INSERT")
+console.log("*************************************************")
+// force: true will drop the table if it already exists
+debugger
+/*.then(() => {
+  // Table created
+  return User.create({
+    firstName: 'John',
+    lastName: 'Hancock'
+  });
+});*/
+
+/*
+User.update({
+  lastName: 'Hancock2',
+}, {
+  where: {
+    id: 1
+  }
+});*/
+
+console.log("GET")
+console.log("*************************************************")
+/* User.findAll().then(users => {
+  console.log(users)
+}) */
+console.log("GET BY ID")
+console.log("*************************************************")
+
+/*
+User.find({
+  where: {
+    id: 3
+  }
+}).then(results => {
+  console.log("================")
+  console.log(results)
+  console.log("================")
+});*/
+
+/*
+User.destroy({
+  where: {
+    id: 2
+  }
+});*/
 
 fetch('https://jsonplaceholder.typicode.com/todos/1')
   .then(response => response.json())
@@ -83,14 +179,17 @@ server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen({ port: 4000 }, () =>
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`),
-  console.log(`🚀 Subscriptions ready at ws://localhost:4000${server.subscriptionsPath}`),
-  mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true }, (err, res) => {
+  console.log(`🚀 Subscriptions ready at ws://localhost:4000${server.subscriptionsPath}`)
+  /*mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true }, (err, res) => {
   if (err) {
     throw err
   } else {
     console.log('La base de datos esta corriendo correctamente')
   }
-})
+  }),*/
 )
 
+User.findAll().then(users => {
+  console.log(users)
+})
 
